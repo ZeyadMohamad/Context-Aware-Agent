@@ -24,27 +24,27 @@ def create_gradio_interface(llm: Any) -> gr.Interface:
                 
             print(f"🔄 Processing: {message}")
             
-            # Use smart workflow as primary (most reliable), with agent as fallback for testing
+            # Use AGENT as primary approach (true autonomous decision making)
             try:
-                print("🎯 Using smart context-aware workflow...")
-                response = run_smart_context_aware_query(message, llm)
-                print("✅ Smart workflow completed successfully")
+                print("🤖 Using autonomous ReAct agent (primary approach)...")
+                agent = build_agent(llm)
+                response = run_agent_query(agent, message)
                 
-            except Exception as e:
-                print(f"🔄 Smart workflow failed ({str(e)[:50]}...), trying agent")
-                # Try agent as fallback
-                try:
-                    agent = build_agent(llm)
-                    response = run_agent_query(agent, message)
+                # Validate agent response quality
+                if response and len(response.strip()) > 20 and "error" not in response.lower() and "maximum iterations" not in response.lower():
+                    print("✅ Autonomous agent completed successfully")
+                else:
+                    raise Exception("Agent response insufficient or hit iteration limit")
                     
-                    # Check if agent response is meaningful
-                    if response and len(response.strip()) > 20 and "error" not in response.lower():
-                        print("✅ Used autonomous agent as fallback")
-                    else:
-                        raise Exception("Agent response insufficient")
-                        
+            except Exception as e:
+                print(f"🔄 Agent failed ({str(e)[:50]}...), trying smart workflow")
+                # Fallback to smart workflow
+                try:
+                    response = run_smart_context_aware_query(message, llm)
+                    print("✅ Used smart workflow as fallback")
+                    
                 except Exception as e2:
-                    print(f"🔄 Agent also failed, using manual workflow")
+                    print(f"🔄 Smart workflow also failed, using manual workflow")
                     # Final fallback to manual workflow
                     try:
                         response = run_manual_context_aware_query(message, llm)
@@ -69,15 +69,22 @@ def create_gradio_interface(llm: Any) -> gr.Interface:
     ) as interface:
         
         gr.Markdown("""
-        # 🤖 Context-Aware Chatbot
+        # 🤖 Context-Aware Chatbot with Autonomous Agent
         
-        This chatbot is context-aware! It will:
+        This chatbot uses a **true autonomous ReAct agent** that makes its own decisions about which tools to use!
         
-        1. 🕵️ Check if you provided enough context in your question
-        2. 🌐 Search the web if more information is needed  
-        3. 🎯 Provide comprehensive answers using all available information
+        🧠 **How it works:**
+        - The agent **autonomously decides** which tools are needed for your question
+        - It can **reason through complex problems** using multiple tools in sequence
+        - **No predefined steps** - the agent chooses its own path to answer your question
         
-        Try asking questions with and without context to see the difference!
+        🔧 **Available Tools for the Agent:**
+        1. 🕵️ **ContextPresenceJudge** - Determines if you provided context
+        2. ✂️ **ContextSplitter** - Separates background info from questions  
+        3. 🌐 **WebSearchTool** - Searches for missing information
+        4. 🎯 **ContextRelevanceChecker** - Validates context relevance
+        
+        Try different types of questions to see the agent's autonomous decision-making in action!
         """)
         
         chatbot = gr.Chatbot(

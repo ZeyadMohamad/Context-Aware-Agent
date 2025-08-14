@@ -59,9 +59,22 @@ def build_agent(llm: Any) -> AgentExecutor:
         agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True,  # Show reasoning to verify true decision making
         handle_parsing_errors=True,
-        max_iterations=3,  # Limit to prevent infinite loops
-        early_stopping_method="force",  # Force stop when max iterations reached
-        return_intermediate_steps=False
+        max_iterations=5,  # Increased slightly to allow for autonomous decisions
+        early_stopping_method="generate",  # Generate response even if max iterations reached
+        return_intermediate_steps=False,
+        agent_kwargs={
+            "prefix": """You are an intelligent assistant that can make autonomous decisions about which tools to use to answer user questions.
+
+You have access to these tools:
+- ContextPresenceJudge: Determine if the user provided sufficient context
+- ContextSplitter: Separate background information from the actual question  
+- WebSearchTool: Search for information when you need external knowledge
+- ContextRelevanceChecker: Check if context is relevant to the question
+
+You should think step by step and decide which tools will help you provide the best answer. You are autonomous - make your own decisions!""",
+            "format_instructions": "Use the following format:\n\nThought: I need to think about what the user is asking and which tools might help.\nAction: [tool name]\nAction Input: [input to the tool]\nObservation: [result from tool]\n... (repeat Thought/Action/Action Input/Observation as needed)\nThought: I now have enough information to answer the question.\nFinal Answer: [your comprehensive answer to the user]",
+            "suffix": "Begin!\n\nQuestion: {input}\nThought: {agent_scratchpad}"
+        }
     )
     
     print("🤖 Initialized autonomous ReAct agent with 4 tools")
@@ -81,37 +94,42 @@ def run_agent_query(agent: AgentExecutor, user_input: str) -> str:
         str: Agent's response
     """
     try:
-        # Create a more focused prompt that prevents redundant tool usage
+        # Create a focused prompt that encourages autonomous tool usage
         agent_prompt = f"""
-You are an intelligent assistant with access to specialized tools. Your goal is to answer the user's question efficiently.
+You are an intelligent assistant. The user asked: "{user_input}"
 
-IMPORTANT: Be efficient - avoid redundant tool calls. Once you have the information needed, provide your final answer.
+You have access to these tools and should decide autonomously which ones to use:
 
-Available Tools:
-- ContextSplitter: Separates background context from questions (use when input seems to contain context)
-- ContextPresenceJudge: Determines if context is present (use on unclear inputs)  
-- WebSearchTool: Searches for information (use when you need external information)
-- ContextRelevanceChecker: Validates context relevance (use when you have context to verify)
+🔧 Available Tools:
+- ContextPresenceJudge: Check if user provided context/background info
+- ContextSplitter: Separate context from question (if input has both)  
+- WebSearchTool: Search for information when you need external knowledge
+- ContextRelevanceChecker: Verify if context matches the question
 
-EFFICIENCY RULES:
-1. If input is a simple question without context → directly use WebSearchTool
-2. If input clearly has context → use ContextSplitter, then answer with that context
-3. Don't use multiple tools for the same purpose
-4. Stop as soon as you can answer the question
+🎯 Your Task:
+Analyze the user's input and decide which tools will help you provide the best answer. You may use multiple tools or just one - it's your decision based on what the user needs.
 
-User Input: {user_input}
+Think step by step:
+1. Does the user's input need any tool assistance?
+2. Which tools would be most helpful?
+3. Use them efficiently to gather what you need
+4. Provide a comprehensive final answer
 
-Analyze this efficiently and provide a comprehensive answer.
+Be autonomous - make your own decisions about tool usage!
 """
 
         # Let the agent make autonomous decisions
         try:
             response = agent.invoke({"input": agent_prompt})
         except Exception as e:
-            # If agent gets stuck, provide a fallback response
-            if "None is not a valid tool" in str(e) or "maximum iterations" in str(e).lower():
-                print("⚠️ Agent reached iteration limit, providing fallback response")
-                return "I found some information, but let me provide a direct answer to your question. Please try asking again for a more detailed response."
+            # Handle specific agent errors gracefully
+            error_str = str(e).lower()
+            if "none is not a valid tool" in error_str:
+                print("⚠️ Agent tried to use invalid tool, providing fallback")
+                return "I encountered a tool selection issue. Let me provide a direct answer to your question. Please try asking again if you need more detail."
+            elif "maximum iterations" in error_str or "iteration limit" in error_str:
+                print("⚠️ Agent reached iteration limit, providing partial response")
+                return "I was working on your question but reached my processing limit. Please try rephrasing your question for a complete response."
             else:
                 raise e
         
@@ -121,16 +139,28 @@ Analyze this efficiently and provide a comprehensive answer.
         else:
             agent_output = str(response)
             
-        # Post-process the response to ensure it's useful
-        if not agent_output or len(agent_output.strip()) < 20:
+        # Validate response quality
+        if not agent_output or len(agent_output.strip()) < 10:
             return "I processed your question but didn't generate a complete response. Please try rephrasing your question."
+        
+        # Clean up any tool artifacts from the response
+        if "Action:" in agent_output or "Observation:" in agent_output:
+            # Extract just the final answer if tool traces are present
+            lines = agent_output.split('\n')
+            final_lines = []
+            for line in lines:
+                if not line.strip().startswith(('Action:', 'Action Input:', 'Observation:', 'Thought:')):
+                    final_lines.append(line)
+            cleaned_output = '\n'.join(final_lines).strip()
+            if cleaned_output and len(cleaned_output) > 20:
+                agent_output = cleaned_output
             
         return agent_output
         
     except Exception as e:
         print(f"Agent error: {e}")
-        # Fallback to simple approach if agent fails
-        return f"I encountered an error with the autonomous agent. Error: {str(e)}"
+        # Provide helpful error context
+        return f"The autonomous agent encountered an issue. Please try rephrasing your question or ask something different."
 
 
 def run_manual_context_aware_query(user_input: str, llm: Any) -> str:
