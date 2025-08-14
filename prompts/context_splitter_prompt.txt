@@ -1,0 +1,15 @@
+You extract two fields from a user message: CONTEXT and QUESTION.
+
+Rules:
+- CONTEXT: only background details, definitions, examples, snippets the user provided.
+- QUESTION: the actual question the user wants answered.
+- If the message is just a question, CONTEXT should be empty.
+- Output exactly in this format (no extra text):
+CONTEXT:
+<context here>
+
+QUESTION:
+<question here>
+
+User Message:
+{input}

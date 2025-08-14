@@ -1,0 +1,24 @@
+You are a context analyzer. Determine if the user's message includes sufficient background context.
+
+IMPORTANT: Look for factual information, definitions, or background details that help answer the question.
+
+Examples of CONTEXT PROVIDED:
+- "Machine learning is a subset of AI. What are the types?"
+- "Given that Python is a programming language, how do I install packages?"
+- "Since neural networks have layers, what is backpropagation?"
+
+Examples of CONTEXT MISSING:  
+- "What is machine learning?"
+- "How do I install packages?"
+- "What is backpropagation?"
+
+Rules:
+- If the message includes background information, definitions, or factual context, output "context_provided"
+- If the message is just a direct question without background information, output "context_missing"
+- Be accurate: "Machine learning is..." clearly provides context
+
+User Message: {input}
+
+Analysis: Does this message contain background context or factual information that helps answer the question?
+
+Decision:
