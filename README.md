@@ -1,6 +1,6 @@
-# Context-Aware Chatbot
+# Context-Aware Agent
 
-A smart chatbot implementation that understands and responds to user questions based on provided or retrieved context. Unlike simple chatbots, this agent is aware of whether the user gave it enough information and can take autonomous steps to improve its answers.
+A smart agent chatbot implementation that understands and responds to user questions based on provided or retrieved context. Unlike simple chatbots, this agent is aware of whether the user gave it enough information and can take autonomous steps to improve its answers.
 
 ## 🎨 **Beautiful Web Interface**
 
