@@ -2,6 +2,15 @@
 
 A smart chatbot implementation that understands and responds to user questions based on provided or retrieved context. Unlike simple chatbots, this agent is aware of whether the user gave it enough information and can take autonomous steps to improve its answers.
 
+## 🎨 **Beautiful Web Interface**
+
+The chatbot features a modern, responsive Flask web interface with:
+- 🎨 **Modern Design**: Clean, professional UI with smooth animations
+- 📱 **Responsive Layout**: Works perfectly on desktop, tablet, and mobile
+- 🤖 **Real-time Chat**: Interactive messaging with typing indicators
+- 🧠 **Agent Status**: Visual indicators showing autonomous tool selection
+- 💡 **Example Questions**: Quick-start buttons for testing different scenarios
+
 ## 🧠 How It Works
 
 At the core of this system is a **LangChain React Agent** that doesn't follow hardcoded rules, but instead decides which tools to use based on what the user says.
@@ -50,11 +59,14 @@ The chatbot:
 
 4. **Run the chatbot**:
    ```bash
-   # Web interface (recommended)
+   # Beautiful Flask web interface (recommended)
    python main.py --mode web
    
    # Command line interface
    python main.py --mode cli
+   
+   # Custom port for web interface
+   python main.py --mode web --port 8080
    ```
 
 ## 🧪 Example Usage
@@ -81,7 +93,13 @@ context-aware-chatbot/
 │   ├── context_relevance_checker.py
 │   └── context_splitter.py
 ├── prompts/               # LLM prompts
-├── ui/                    # Gradio web interface
+├── web/                   # Flask web interface
+│   ├── app.py            # Main Flask application
+│   ├── templates/        # HTML templates
+│   │   └── chat.html     # Beautiful chat interface
+│   └── static/           # CSS, JS, and assets
+│       ├── css/style.css # Modern styling
+│       └── js/chat.js    # Interactive chat functionality
 ├── tests/                 # Unit and integration tests
 ├── main.py               # Application entry point
 └── requirements.txt      # Dependencies
@@ -114,7 +132,7 @@ python test_agent_fixes.py
 
 - **Learning-based**, not rule-based
 - **Smart decisions dynamically** (not scripted)
-- **Open-source tools** (LangChain, Gradio, Ollama)
+- **Open-source tools** (LangChain, Flask, Ollama)
 - **Human-like reasoning**:
   - "Did you give me what I need to answer?"
   - "If not, let me look it up."
@@ -144,6 +162,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 - Built with [LangChain](https://langchain.com/) for agent orchestration
-- UI powered by [Gradio](https://gradio.app/)
+- Beautiful web UI powered by [Flask](https://flask.palletsprojects.com/) with modern HTML/CSS/JS
 - Local LLM support via [Ollama](https://ollama.ai/)
 - Web search capabilities through Wikipedia and Tavily APIs

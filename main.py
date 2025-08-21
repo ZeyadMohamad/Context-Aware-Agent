@@ -3,7 +3,7 @@ Main entry point for the Context-Aware Chatbot.
 
 This script initializes the chatbot and provides options to run it via:
 1. Command line interface
-2. Gradio web interface
+2. Flask web interface
 """
 
 import os
@@ -11,7 +11,7 @@ import argparse
 from dotenv import load_dotenv
 
 from agent.agent_runner import initialize_llm, build_agent, run_agent_query
-from ui.gradio_interface import create_gradio_interface
+from web.app import create_flask_app
 
 
 def main():
@@ -30,8 +30,8 @@ def main():
     parser.add_argument(
         "--port",
         type=int,
-        default=7860,
-        help="Port for web interface (default: 7860)"
+        default=5000,
+        help="Port for Flask web interface (default: 5000)"
     )
     
     args = parser.parse_args()
@@ -87,22 +87,22 @@ def run_cli_mode(llm):
 
 
 def run_web_mode(llm, port):
-    """Run the chatbot in web mode using Gradio."""
-    print(f"\n🌐 Starting Web Interface on port {port}...")
+    """Run the chatbot in web mode using Flask."""
+    print(f"\n🌐 Starting Flask Web Interface on port {port}...")
     
     try:
-        # Create Gradio interface
-        interface = create_gradio_interface(llm)
+        # Create Flask app
+        flask_app = create_flask_app(llm)
         
-        # Launch the interface
-        interface.launch(
-            server_port=port,
-            share=False,  # Set to True if you want a public link
-            show_error=True # Show error messages in the interface
-        )
+        # Launch the Flask server
+        print(f"🚀 Server starting at http://localhost:{port}")
+        print("📱 Open your browser and navigate to the URL above")
+        print("🔄 Press Ctrl+C to stop the server")
+        
+        flask_app.run(host='127.0.0.1', port=port, debug=False)
         
     except Exception as e:
-        print(f"❌ Error launching web interface: {e}")
+        print(f"❌ Error launching Flask interface: {e}")
         print("💡 Falling back to CLI mode...")
         run_cli_mode(llm)
 

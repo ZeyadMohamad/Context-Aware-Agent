@@ -132,7 +132,10 @@ if __name__ == "__main__":
     test_autonomous_behavior()
     test_agent_vs_manual_comparison()
     
-    print(f"\n🚀 To test the web interface with autonomous agent:")
+    print(f"\n🚀 To test the beautiful Flask web interface with autonomous agent:")
     print("   python main.py --mode web")
+    print("   Then open: http://localhost:5000")
     print(f"\n🚀 To test CLI with autonomous agent:")
     print("   python main.py --mode cli")
+    print(f"\n🧪 To test the Flask interface functionality:")
+    print("   python test_flask_interface.py")

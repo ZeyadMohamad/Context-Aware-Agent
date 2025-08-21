@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Processing...</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Auto-refresh to get result -->
+    <meta http-equiv="refresh" content="3; url={{ url_for('home') }}?process=true">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header Section -->
+        <header class="chat-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <h1>Context-Aware Chatbot</h1>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">Processing...</span>
+                </div>
+            </div>
+            <div class="header-description">
+                <p>🧠 <strong>Agent is analyzing your message and selecting tools...</strong></p>
+            </div>
+        </header>
+
+        <!-- Chat Messages Area -->
+        <div class="chat-messages">
+            <!-- Previous messages -->
+            {% if messages %}
+                {% for message in messages[:-1] %}
+                    <!-- User Message -->
+                    <div class="message user-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">
+                                {{ message.user }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bot Response -->
+                    {% if message.bot %}
+                    <div class="message bot-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">
+                                {{ message.bot|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Current message being processed -->
+            {% if messages and messages[-1] %}
+                <!-- User Message -->
+                <div class="message user-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            {{ messages[-1].user }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Loading Bot Response -->
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content loading-message">
+                        <div class="message-text">
+                            <div class="loading-spinner"></div>
+                            <p>🤖 Agent is thinking and choosing tools...</p>
+                            <p><small>This page will automatically refresh when complete</small></p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Processing Notice -->
+        <div class="processing-notice">
+            <div class="processing-content">
+                <div class="loading-spinner"></div>
+                <p><strong>Processing your message...</strong></p>
+                <p>The autonomous agent is analyzing your input and deciding which tools to use.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
