@@ -137,9 +137,6 @@ if __name__ == "__main__":
     """Main execution - start the Flask development server"""
     from agent.agent_runner import initialize_llm
     
-    print("Starting Context-Aware Chatbot Flask Interface...")
-    print("Initializing LLM...")
-    
     # Initialize the language model
     llm = initialize_llm()
     if llm is None:
@@ -147,10 +144,7 @@ if __name__ == "__main__":
         exit(1)
     
     # Create and run the Flask app
-    print("Starting Flask server...")
     chatbot_app = ChatbotApp(llm)
-    
-    print("Flask server starting at http://127.0.0.1:5000")
     
     try:
         chatbot_app.run(host='127.0.0.1', port=5000, debug=True)

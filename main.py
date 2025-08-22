@@ -37,8 +37,6 @@ def main():
     args = parser.parse_args()
     
     try:
-        print("Initializing Context-Aware Chatbot...")
-        
         # Initialize LLM
         llm = initialize_llm()
         
@@ -49,17 +47,11 @@ def main():
             
     except Exception as e:
         print(f"Error starting chatbot: {e}")
-        print("\nMake sure Ollama is installed and running:")
-        print("   1. Install: https://ollama.ai/")
-        print("   2. Run: ollama serve")
-        print("   3. Install model: ollama pull llama3")
 
 
 def run_cli_mode(llm):
     """Run the chatbot in CLI mode."""
-    print("\nStarting CLI Mode...")
     print("Type 'quit' or 'exit' to stop the chatbot")
-    print("="*60)
     
     # Build agent
     agent = build_agent(llm)
@@ -69,41 +61,35 @@ def run_cli_mode(llm):
             user_input = input("\nYou: ").strip()
             
             if user_input.lower() in ['quit', 'exit', 'q']:
-                print("\nGoodbye!")
+                print("Goodbye!")
                 break
                 
             if not user_input:
                 continue
                 
-            print("\nAssistant:")
             response = run_agent_query(agent, user_input)
-            print(response)
+            print(f"Assistant: {response}")
             
         except KeyboardInterrupt:
-            print("\n\nGoodbye!")
+            print("\nGoodbye!")
             break
         except Exception as e:
-            print(f"\nError: {e}")
+            print(f"Error: {e}")
 
 
 def run_web_mode(llm, port):
     """Run the chatbot in web mode using Flask."""
-    print(f"\nStarting Flask Web Interface on port {port}...")
-    
     try:
         # Create Flask app
         flask_app = create_flask_app(llm)
         
         # Launch the Flask server
         print(f"Server starting at http://localhost:{port}")
-        print("Open your browser and navigate to the URL above")
-        print("Press Ctrl+C to stop the server")
         
         flask_app.run(host='127.0.0.1', port=port, debug=False)
         
     except Exception as e:
         print(f"Error launching Flask interface: {e}")
-        print("Falling back to CLI mode...")
         run_cli_mode(llm)
 
 

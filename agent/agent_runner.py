@@ -23,14 +23,10 @@ def initialize_llm() -> Any:
         
         # Test the connection
         test_response = llm.invoke("Hello")  # Updated to use invoke
-        print(f"LLM initialized successfully: {model_name}")
         return llm
         
     except Exception as e:
         print(f"Error initializing Ollama: {e}")
-        print("Make sure Ollama is running and the model is installed")
-        print("   Run: ollama serve")
-        print("   Run: ollama pull llama3")
         raise
 
 
@@ -100,13 +96,13 @@ You are an intelligent assistant. The user asked: "{user_input}"
 
 You have access to these tools and should decide autonomously which ones to use:
 
-🔧 Available Tools:
+Available Tools:
 - ContextPresenceJudge: Check if user provided context/background info
 - ContextSplitter: Separate context from question (if input has both)  
 - WebSearchTool: Search for information when you need external knowledge
 - ContextRelevanceChecker: Verify if context matches the question
 
-🎯 Your Task:
+Your Task:
 Analyze the user's input and decide which tools will help you provide the best answer. You may use multiple tools or just one - it's your decision based on what the user needs.
 
 Think step by step:
@@ -189,8 +185,6 @@ def run_manual_context_aware_query(user_input: str, llm: Any) -> str:
         else:
             user_question = user_input
         
-        print(f"   Context: '{user_context}'")
-        
         # Step 2: Judge if context is sufficient
         # If we have extracted context, judge based on the full context + question
         if user_context:
@@ -251,17 +245,12 @@ Provide a helpful and informative answer. If you need more specific context to g
 
 # Example usage and testing
 if __name__ == "__main__":
-    print("🚀 Initializing Context-Aware Chatbot...")
     
     try:
         # Initialize LLM
         llm = initialize_llm()
         
         # Test simple approach first
-        print("\n" + "="*60)
-        print("🧪 TESTING SIMPLE CONTEXT-AWARE APPROACH")
-        print("="*60)
-        
         test_queries = [
             "What is machine learning?",
             "Tell me how attention mechanisms are used.",
@@ -269,41 +258,21 @@ if __name__ == "__main__":
         ]
         
         for i, query in enumerate(test_queries, 1):
-            print(f"\n📝 Test Query {i}:")
-            print(f"User: {query}")
-            print("\n🤖 Response:")
-            
             response = run_manual_context_aware_query(query, llm)
-            print(response)
-            
-            print("\n" + "-"*60)
             
         # Test agent approach
-        print("\n" + "="*60)
-        print("🧪 TESTING AGENT APPROACH")
-        print("="*60)
-        
         try:
             agent = build_agent(llm)
             
             test_query = "What is LangChain used for?"
-            print(f"\n📝 Agent Test Query:")
-            print(f"User: {test_query}")
-            print("\n🤖 Agent Response:")
-            
             response = run_agent_query(agent, test_query)
-            print(response)
             
         except Exception as e:
-            print(f"❌ Agent approach failed: {e}")
-            print("💡 Using simple approach as fallback")
+            # Agent approach failed, using simple approach as fallback
+            pass
             
     except Exception as e:
-        print(f"❌ Error: {e}")
-        print("\n💡 Troubleshooting Tips:")
-        print("1. Make sure Ollama is installed and running")
-        print("2. Install the required model: ollama pull llama3")
-        print("3. Check that all dependencies are installed")
+        print(f"Error: {e}")
 
 
 def run_smart_context_aware_query(user_input: str, llm: Any) -> str:
@@ -312,14 +281,11 @@ def run_smart_context_aware_query(user_input: str, llm: Any) -> str:
     This version avoids the issues seen in the agent approach.
     """
     try:
-        print(f"🔄 Processing query: {user_input}")
-        
         # Build tools
         context_splitter = build_context_splitter_tool(llm)
         web_search = build_web_search_tool()
         
         # Step 1: Always split first to understand the input
-        print("✂️ Step 1: Analyzing input structure...")
         split_result = context_splitter.func(user_input)
         
         # Parse the result
@@ -336,23 +302,16 @@ def run_smart_context_aware_query(user_input: str, llm: Any) -> str:
         else:
             user_question = user_input
         
-        print(f"   Context found: '{user_context}'")
-        print(f"   Question: '{user_question}'")
-        
         # Step 2: Smart context decision
         if user_context and len(user_context) > 10:  # Simple but effective check
-            print("🎯 Step 2: Context provided - using it directly")
             context_status = "context_provided"
             final_context = user_context
         else:
-            print("🌐 Step 2: No context found - searching for information...")
             context_status = "context_missing"
             search_query = user_question if user_question else user_input
             final_context = web_search.func(search_query)
-            print(f"   Found information: {len(final_context)} characters")
         
         # Step 3: Generate intelligent response
-        print("🤖 Step 3: Generating response...")
         if final_context:
             final_prompt = f"""
 Based on the following context, provide a comprehensive and well-structured answer to the user's question.
@@ -390,6 +349,5 @@ Answer:
         return str(response)
         
     except Exception as e:
-        print(f"Error in smart workflow: {e}")
         return f"I encountered an error while processing your request: {str(e)}"
 
