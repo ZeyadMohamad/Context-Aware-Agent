@@ -106,7 +106,7 @@ Your Task:
 Analyze the user's input and decide which tools will help you provide the best answer. You may use multiple tools or just one - it's your decision based on what the user needs.
 
 Think step by step:
-1. Does the user's input need any tool assistance?
+1. Does the user's input need any tool assistance? If no, you can provide a direct answer based on your knowledge.
 2. Which tools would be most helpful?
 3. Use them efficiently to gather what you need
 4. Provide a comprehensive final answer
