@@ -69,7 +69,6 @@ def build_context_presence_tool(llm: Any) -> Tool:
                 return "context_missing"
                 
         except Exception as e:
-            print(f"Error in context judgment: {e}")
             return "context_missing"
     
     return Tool.from_function(
@@ -81,24 +80,20 @@ def build_context_presence_tool(llm: Any) -> Tool:
 
 # Example usage and testing
 if __name__ == "__main__":
-    from langchain_community.llms import Ollama
+    from langchain_ollama import OllamaLLM
     
     # Initialize LLM (adjust model name as needed)
-    llm = Ollama(model="llama3")
+    llm = OllamaLLM(model="llama3")
     
     # Build the tool
     context_tool = build_context_presence_tool(llm)
     
-    # Test cases
+    # Test cases - silent testing
     test_inputs = [
-        "What is machine learning?",  # Should be context_missing
-        "Machine learning is a subset of AI that uses algorithms to learn from data. What are the main types of machine learning?",  # Should be context_provided
-        "How does attention work in transformers?",  # Should be context_missing
+        "What is machine learning?",
+        "Machine learning is a subset of AI that uses algorithms to learn from data. What are the main types of machine learning?",
+        "How does attention work in transformers?",
     ]
     
-    print("Testing Context Presence Judge Tool:")
-    for i, test_input in enumerate(test_inputs, 1):
-        result = context_tool.func(test_input)
-        print(f"\nTest {i}:")
-        print(f"Input: {test_input}")
-        print(f"Result: {result}")
+    for test_input in test_inputs:
+        context_tool.func(test_input)  # Run silently

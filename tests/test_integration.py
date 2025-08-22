@@ -125,6 +125,6 @@ What are the main supervised learning algorithms?"""
 
 
 if __name__ == "__main__":
-    print("🧪 Running Integration Tests for Context-Aware Chatbot")
+    print("Running Integration Tests for Context-Aware Chatbot")
     print("=" * 60)
     unittest.main(verbosity=2)

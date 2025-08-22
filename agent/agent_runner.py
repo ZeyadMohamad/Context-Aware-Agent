@@ -3,9 +3,10 @@
 import os
 from typing import Any, List
 from langchain.agents import initialize_agent, AgentType
+from langchain.agents import initialize_agent, AgentType
 from langchain.agents.agent import AgentExecutor
 from langchain.tools import Tool
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from tools import (
     build_context_presence_tool, 
     build_web_search_tool,
@@ -18,16 +19,16 @@ def initialize_llm() -> Any:
     """Initialize the language model (Ollama or other)."""
     try:
         model_name = os.getenv("OLLAMA_MODEL", "llama3")
-        llm = Ollama(model=model_name)
+        llm = OllamaLLM(model=model_name)
         
         # Test the connection
         test_response = llm.invoke("Hello")  # Updated to use invoke
-        print(f"✅ LLM initialized successfully: {model_name}")
+        print(f"LLM initialized successfully: {model_name}")
         return llm
         
     except Exception as e:
-        print(f"❌ Error initializing Ollama: {e}")
-        print("💡 Make sure Ollama is running and the model is installed")
+        print(f"Error initializing Ollama: {e}")
+        print("Make sure Ollama is running and the model is installed")
         print("   Run: ollama serve")
         print("   Run: ollama pull llama3")
         raise
@@ -77,7 +78,6 @@ You should think step by step and decide which tools will help you provide the b
         }
     )
     
-    print("🤖 Initialized autonomous ReAct agent with 4 tools")
     return agent
 
 
@@ -125,10 +125,8 @@ Be autonomous - make your own decisions about tool usage!
             # Handle specific agent errors gracefully
             error_str = str(e).lower()
             if "none is not a valid tool" in error_str:
-                print("⚠️ Agent tried to use invalid tool, providing fallback")
                 return "I encountered a tool selection issue. Let me provide a direct answer to your question. Please try asking again if you need more detail."
             elif "maximum iterations" in error_str or "iteration limit" in error_str:
-                print("⚠️ Agent reached iteration limit, providing partial response")
                 return "I was working on your question but reached my processing limit. Please try rephrasing your question for a complete response."
             else:
                 raise e
@@ -158,7 +156,6 @@ Be autonomous - make your own decisions about tool usage!
         return agent_output
         
     except Exception as e:
-        print(f"Agent error: {e}")
         # Provide helpful error context
         return f"The autonomous agent encountered an issue. Please try rephrasing your question or ask something different."
 
@@ -169,8 +166,6 @@ def run_manual_context_aware_query(user_input: str, llm: Any) -> str:
     This demonstrates the ideal workflow without relying on agent decision-making.
     """
     try:
-        print(f"🔄 Processing query: {user_input}")
-        
         # Build all tools
         context_splitter = build_context_splitter_tool(llm)
         context_judge = build_context_presence_tool(llm)
@@ -178,7 +173,6 @@ def run_manual_context_aware_query(user_input: str, llm: Any) -> str:
         relevance_checker = build_context_relevance_tool(llm)
         
         # Step 1: Split the user input into context and question
-        print("✂️ Step 1: Splitting context and question...")
         split_result = context_splitter.func(user_input)
         
         # Parse the returned string format "Context: ... Question: ..."
@@ -196,10 +190,8 @@ def run_manual_context_aware_query(user_input: str, llm: Any) -> str:
             user_question = user_input
         
         print(f"   Context: '{user_context}'")
-        print(f"   Question: '{user_question}'")
         
         # Step 2: Judge if context is sufficient
-        print("🕵️ Step 2: Checking if context is sufficient...")
         # If we have extracted context, judge based on the full context + question
         if user_context:
             input_for_judge = f"{user_context} {user_question}"
@@ -207,17 +199,14 @@ def run_manual_context_aware_query(user_input: str, llm: Any) -> str:
         else:
             # No context extracted, judge the original input
             context_status = context_judge.func(user_input)
-        print(f"   Context status: {context_status}")
         
         # Step 3: Search for information if context is missing
         search_results = ""
         final_context = user_context
         
         if context_status == "context_missing" or not user_context:
-            print("🌐 Step 3: Searching for missing information...")
             search_query = user_question if user_question else user_input
             search_results = web_search.func(search_query)
-            print(f"   Search results length: {len(search_results)} characters")
             
             # Use search results as context if we didn't have any
             if not final_context:
@@ -225,17 +214,14 @@ def run_manual_context_aware_query(user_input: str, llm: Any) -> str:
         
         # Step 4: Check relevance of context (if we have any)
         if final_context:
-            print("🎯 Step 4: Checking context relevance...")
             # Format the input for relevance checker
             relevance_input = f"Context: {final_context}\nQuestion: {user_question if user_question else user_input}"
             relevance_status = relevance_checker.func(relevance_input)
-            print(f"   Relevance status: {relevance_status}")
             
             if relevance_status == "irrelevant":
                 final_context = ""  # Discard irrelevant context
         
         # Step 5: Generate final response
-        print("🤖 Step 5: Generating final response...")
         if final_context:
             final_prompt = f"""
 Based on the following context, please provide a comprehensive answer to the user's question:
@@ -260,7 +246,6 @@ Provide a helpful and informative answer. If you need more specific context to g
         return str(response)
         
     except Exception as e:
-        print(f"Error in workflow: {e}")
         return f"I encountered an error while processing your request: {str(e)}"
 
 

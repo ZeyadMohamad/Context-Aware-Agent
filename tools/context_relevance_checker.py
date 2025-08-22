@@ -85,7 +85,6 @@ def build_context_relevance_tool(llm: Any) -> Tool:
                 return "relevant"  # Default to relevant if unclear
         
         except Exception as e:
-            print(f"Error in relevance checking: {e}")
             return "relevant"  # Default to relevant on error
 
     return Tool.from_function(

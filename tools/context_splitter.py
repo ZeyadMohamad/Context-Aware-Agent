@@ -89,7 +89,6 @@ def build_context_splitter_tool(llm: Any) -> Tool:
             return f"Context: {ctx}\nQuestion: {q}"
             
         except Exception as e:
-            print(f"Error in context splitting: {e}")
             return f"Context: \nQuestion: {user_input}"
 
     return Tool.from_function(

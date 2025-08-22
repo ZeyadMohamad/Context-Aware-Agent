@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 def test_flask_interface():
     """Test the Flask web interface functionality"""
     
-    print("🧪 TESTING FLASK WEB INTERFACE (Server-Side Rendering)")
+    print("TESTING FLASK WEB INTERFACE (Server-Side Rendering)")
     print("="*60)
     
     base_url = "http://localhost:5000"

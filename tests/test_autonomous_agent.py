@@ -10,7 +10,7 @@ import time
 def test_autonomous_behavior():
     """Test that the agent makes autonomous decisions about tool usage."""
     
-    print("🧪 TESTING AUTONOMOUS AGENT BEHAVIOR")
+    print("TESTING AUTONOMOUS AGENT BEHAVIOR")
     print("="*60)
     
     try:

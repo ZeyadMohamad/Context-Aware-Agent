@@ -35,7 +35,6 @@ def tavily_search(query: str, api_key: str) -> str:
             return f"Search API error: {response.status_code}"
             
     except Exception as e:
-        print(f"Tavily search error: {e}")
         return f"Search error: {str(e)}"
 
 
@@ -71,7 +70,6 @@ def wikipedia_search(query: str) -> str:
         return "No relevant Wikipedia page found for this topic."
         
     except Exception as e:
-        print(f"Wikipedia search error: {e}")
         return f"Wikipedia search error: {str(e)}"
 
 
@@ -93,15 +91,12 @@ def build_web_search_tool() -> Tool:
         use_simulated = os.getenv("USE_SIMULATED_SEARCH", "true").lower() == "true"
         
         if tavily_api_key and not use_simulated:
-            print(f"🌐 Searching with Tavily API: {query}")
             result = tavily_search(query, tavily_api_key)
             # Fallback to Wikipedia if Tavily fails
             if "error" in result.lower():
-                print("🔄 Tavily failed, falling back to Wikipedia...")
                 return wikipedia_search(query)
             return result
         else:
-            print(f"🔍 Searching with Wikipedia: {query}")
             return wikipedia_search(query)
     
     return Tool.from_function(
@@ -115,16 +110,12 @@ if __name__ == "__main__":
     # Build the tool
     search_tool = build_web_search_tool()
     
-    # Test cases
+    # Test cases - silent testing
     test_queries = [
         "machine learning algorithms",
-        "attention mechanisms in transformers",
+        "attention mechanisms in transformers", 
         "LangChain framework"
     ]
     
-    print("Testing Web Search Tool:")
-    for i, query in enumerate(test_queries, 1):
-        result = search_tool.func(query)
-        print(f"\nTest {i}:")
-        print(f"Query: {query}")
-        print(f"Result: {result[:200]}...")  # Show first 200 chars
+    for query in test_queries:
+        search_tool.func(query)  # Run silently

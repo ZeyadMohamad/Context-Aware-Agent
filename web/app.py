@@ -137,25 +137,24 @@ if __name__ == "__main__":
     """Main execution - start the Flask development server"""
     from agent.agent_runner import initialize_llm
     
-    print("🚀 Starting Context-Aware Chatbot Flask Interface...")
-    print("📡 Initializing LLM...")
+    print("Starting Context-Aware Chatbot Flask Interface...")
+    print("Initializing LLM...")
     
     # Initialize the language model
     llm = initialize_llm()
     if llm is None:
-        print("❌ Failed to initialize LLM. Exiting.")
+        print("Failed to initialize LLM. Exiting.")
         exit(1)
     
     # Create and run the Flask app
-    print("🌐 Starting Flask server...")
+    print("Starting Flask server...")
     chatbot_app = ChatbotApp(llm)
     
-    print("✅ Flask server starting at http://127.0.0.1:5000")
-    print("🛑 Press Ctrl+C to stop the server")
+    print("Flask server starting at http://127.0.0.1:5000")
     
     try:
         chatbot_app.run(host='127.0.0.1', port=5000, debug=True)
     except KeyboardInterrupt:
-        print("\n🛑 Server stopped by user")
+        print("Server stopped by user")
     except Exception as e:
-        print(f"❌ Server error: {e}")
+        print(f"Server error: {e}")
