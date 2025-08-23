@@ -5,29 +5,15 @@ from typing import Any
 
 def _load_prompt() -> str:
     """Load the context splitter prompt from file."""
+
     prompt_path = os.path.join(os.path.dirname(__file__), '..', 'prompts', 'context_splitter_prompt.txt')
+
     try:
         with open(prompt_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
+        
     except FileNotFoundError:
-        # Fallback prompt if file doesn't exist
-        return """
-You extract two fields from a user message: CONTEXT and QUESTION.
-
-Rules:
-- CONTEXT: only background details, definitions, examples, snippets the user provided.
-- QUESTION: the actual question the user wants answered.
-- If the message is just a question, CONTEXT should be empty.
-- Output exactly in this format (no extra text):
-CONTEXT:
-<context here>
-
-QUESTION:
-<question here>
-
-User Message:
-{input}
-""".strip()
+        return "prompt not existing"
 
 def build_context_splitter_tool(llm: Any) -> Tool:
     prompt_template = _load_prompt()
@@ -94,5 +80,9 @@ def build_context_splitter_tool(llm: Any) -> Tool:
     return Tool.from_function(
         func=_split,
         name="ContextSplitter",
-        description="Splits a user message into context and question parts. Returns 'Context: <context>\\nQuestion: <question>' format that other tools can easily parse."
+        description="""
+Use this tool only when observation shows "relevant_context" from the Context Relevance Checker.
+pass the entire user input to this tool, including both the context and the question.
+After using this tool, combine the extracted context with the extracted question and produce the Final Answer.
+"""
     )

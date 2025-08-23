@@ -1,5 +1,3 @@
-"""Web Search Tool - Retrieves information when context is missing."""
-
 import os
 import requests
 import wikipedia
@@ -41,20 +39,15 @@ def tavily_search(query: str, api_key: str) -> str:
 def wikipedia_search(query: str) -> str:
     """Fallback search using Wikipedia."""
     try:
-        # Set Wikipedia language to English
         wikipedia.set_lang("en")
-        
-        # Search for relevant pages
         search_results = wikipedia.search(query, results=3)
         
         if not search_results:
             return "No relevant Wikipedia articles found."
         
-        # Get the first relevant page
         page_title = search_results[0]
-        
-        # Return summary (first few sentences)
         summary = wikipedia.summary(page_title, sentences=4, auto_suggest=False)
+
         return f"From Wikipedia ({page_title}):\n{summary}"
         
     except wikipedia.exceptions.DisambiguationError as e:
@@ -83,16 +76,16 @@ def build_web_search_tool() -> Tool:
     
     def web_search(query: str) -> str:
         """Search the web for information about the given query."""
+
         if not query or not query.strip():
             return "Empty search query provided."
             
-        # Check for Tavily API key
         tavily_api_key = os.getenv("TAVILY_API_KEY")
         use_simulated = os.getenv("USE_SIMULATED_SEARCH", "true").lower() == "true"
         
         if tavily_api_key and not use_simulated:
             result = tavily_search(query, tavily_api_key)
-            # Fallback to Wikipedia if Tavily fails
+            
             if "error" in result.lower():
                 return wikipedia_search(query)
             return result
@@ -102,20 +95,11 @@ def build_web_search_tool() -> Tool:
     return Tool.from_function(
         func=web_search,
         name="WebSearchTool",
-        description="Searches the web (using Tavily API or Wikipedia) to retrieve information about a given topic. Use this when the user's question lacks sufficient context."
+        description="""
+Use this tool to gather fresh and relevant context from the internet when:
+observation shows "context_missing" or "irrelevant_context" from the previous tools.
+This tool performs a web search based on the user's input.
+Pass the entire input to this tool, and it will return the most relevant web search result.
+""",
+        return_direct = True
     )
-
-# Example usage and testing
-if __name__ == "__main__":
-    # Build the tool
-    search_tool = build_web_search_tool()
-    
-    # Test cases - silent testing
-    test_queries = [
-        "machine learning algorithms",
-        "attention mechanisms in transformers", 
-        "LangChain framework"
-    ]
-    
-    for query in test_queries:
-        search_tool.func(query)  # Run silently

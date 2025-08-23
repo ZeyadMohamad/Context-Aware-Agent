@@ -5,28 +5,15 @@ from typing import Any
 
 def _load_prompt() -> str:
     """Load the context relevance prompt from file."""
+
     prompt_path = os.path.join(os.path.dirname(__file__), '..', 'prompts', 'context_relevance_prompt.txt')
+    
     try:
         with open(prompt_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
+        
     except FileNotFoundError:
-        # Fallback prompt if file doesn't exist
-        return """
-You are a relevance judge. Decide if the provided CONTEXT helps answer the QUESTION.
-
-Rules:
-- Output ONLY "relevant" or "irrelevant".
-- "relevant" if the context directly supports, defines, describes, or contains facts needed to answer the question.
-- Be strict: tangential or generic info ⇒ "irrelevant".
-
-CONTEXT:
-{context}
-
-QUESTION:
-{question}
-
-Decision:
-""".strip()
+        return "prompt file not found"
 
 def build_context_relevance_tool(llm: Any) -> Tool:
     prompt_template = _load_prompt()
@@ -90,5 +77,9 @@ def build_context_relevance_tool(llm: Any) -> Tool:
     return Tool.from_function(
         func=_judge,
         name="ContextRelevanceChecker",
-        description="Checks if provided context is relevant to a question. Input can be: 'Context: <context> Question: <question>' or just a question (will assume relevant). Returns 'relevant' or 'irrelevant'."
+        description="""
+Use this tool when observation shows "context_provided" from the Context Presence Judge.
+؛ass the entire user input to this tool, including both the context and the question.
+The output should clearly indicate whether the context is relevant or irrelevant to the question."
+ """    
     )
